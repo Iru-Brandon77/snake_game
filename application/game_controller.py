@@ -1,5 +1,6 @@
 from enum import Enum, auto
 
+import settings
 from domain.game_rules import GameRules
 from domain.snake import Snake
 from domain.food import Food
@@ -30,8 +31,8 @@ class GameController:
       - Internal logic of snake movement or food relocation.
     """
 
-    BOARD_WIDTH  = 20
-    BOARD_HEIGHT = 20
+    BOARD_WIDTH  = settings.BOARD_WIDTH
+    BOARD_HEIGHT = settings.BOARD_HEIGHT
 
     def __init__(self, high_score_repo: HighScoreRepository) -> None:
         self._repo       = high_score_repo
@@ -124,5 +125,5 @@ class GameController:
             occupied=set(snake.body) | self._obstacle.cells,
         )
         snake_ctrl = SnakeController(snake)
-        food_ctrl  = FoodController(food, self.BOARD_WIDTH, self.BOARD_HEIGHT)
+        food_ctrl  = FoodController(food, self.BOARD_WIDTH, self.BOARD_HEIGHT, settings.POINTS_PER_FOOD)
         return snake_ctrl, food_ctrl
