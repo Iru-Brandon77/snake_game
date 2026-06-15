@@ -1,35 +1,16 @@
 from dataclasses import dataclass, field
 
-
 @dataclass
 class Obstacle:
-    """
-    Represents a collection of fixed blocked cells (walls).
-
-    Knows:
-      - Which cells are blocked.
-      - Whether a given cell is blocked.
-
-    Does NOT know:
-      - The snake, food, or any other game entity.
-      - How to draw itself.
-      - What happens when the snake hits it.
-    """
-
     cells: set[tuple[int, int]] = field(default_factory=set)
 
     # ── Factory ────────────────────────────────────────────────────────────
     @classmethod
     def empty(cls) -> "Obstacle":
-        """No obstacles — open board."""
         return cls(cells=set())
 
     @classmethod
     def from_level(cls, level: int = 1) -> "Obstacle":
-        """
-        Returns a predefined obstacle layout for the given level.
-        Add more levels here as the game grows.
-        """
         layouts: dict[int, list[tuple[int, int]]] = {
             1: [
                 (5, 5), (5, 6), (5, 7),

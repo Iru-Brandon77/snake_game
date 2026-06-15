@@ -4,19 +4,6 @@ from dataclasses import dataclass
 
 @dataclass
 class Food:
-    """
-    Represents a single food item on the board.
-
-    Knows:
-      - Its current position.
-      - How to move itself to a new random position.
-
-    Does NOT know:
-      - The snake, obstacles, or any other game entity.
-      - How to draw itself.
-      - What happens when the snake eats it.
-    """
-
     position: tuple[int, int]
 
     # ── Factory ────────────────────────────────────────────────────────────
@@ -27,7 +14,6 @@ class Food:
         board_height: int,
         occupied: set[tuple[int, int]] | None = None,
     ) -> "Food":
-        """Creates a Food item at a random unoccupied cell."""
         food = cls(position=(0, 0))
         food.relocate(board_width, board_height, occupied)
         return food
@@ -39,10 +25,6 @@ class Food:
         board_height: int,
         occupied: set[tuple[int, int]] | None = None,
     ) -> None:
-        """
-        Moves the food to a new random cell that is not in `occupied`.
-        `occupied` should contain the snake body + obstacle positions.
-        """
         occupied = occupied or set()
 
         available = [

@@ -17,20 +17,6 @@ class GameState(Enum):
 
 
 class GameController:
-    """
-    Orchestrates one game session.
-
-    Knows:
-      - The current game state (running, paused, game over).
-      - When to delegate to SnakeController, FoodController, and GameRules.
-      - When to persist the high score.
-
-    Does NOT know:
-      - How to draw anything.
-      - How keyboard events are captured.
-      - Internal logic of snake movement or food relocation.
-    """
-
     BOARD_WIDTH  = settings.BOARD_WIDTH
     BOARD_HEIGHT = settings.BOARD_HEIGHT
 
@@ -69,10 +55,6 @@ class GameController:
 
     # ── Commands ───────────────────────────────────────────────────────────
     def handle_input(self, action: str) -> None:
-        """
-        Receives abstract input commands from the presentation layer.
-        Valid actions: "UP", "DOWN", "LEFT", "RIGHT", "PAUSE", "RESTART"
-        """
         if action == "PAUSE" and self._state == GameState.RUNNING:
             self._state = GameState.PAUSED
             return
@@ -89,10 +71,6 @@ class GameController:
             self._snake_ctrl.handle_input(action)
 
     def tick(self) -> None:
-        """
-        Advances the game one step. Called once per game loop cycle.
-        Does nothing if the game is not in RUNNING state.
-        """
         if self._state != GameState.RUNNING:
             return
 

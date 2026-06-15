@@ -3,20 +3,6 @@ import settings
 
 
 class Window:
-    """
-    Manages the pygame window and game clock.
-
-    Knows:
-      - Window dimensions and title.
-      - Cell size for mapping grid coordinates to pixels.
-      - How to control the game speed via FPS.
-
-    Does NOT know:
-      - How to draw game entities.
-      - How to handle input.
-      - Any game logic.
-    """
-
     CELL_SIZE: int = settings.CELL_SIZE
     FPS: int       = settings.FPS
 

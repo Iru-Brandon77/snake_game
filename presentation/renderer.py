@@ -6,20 +6,6 @@ from presentation.window import Window
 
 
 class Renderer:
-    """
-    Draws the full game frame onto the pygame surface each tick.
-
-    Knows:
-      - How to translate grid coordinates to pixels via Window.
-      - How to draw each entity type.
-      - How to render pause and game over overlays.
-
-    Does NOT know:
-      - Any game logic or rules.
-      - How input is handled.
-      - How scores are calculated.
-    """
-
     def __init__(self, window: Window) -> None:
         self._window = window
         self._font_large: pygame.font.Font | None = None
@@ -33,10 +19,6 @@ class Renderer:
 
     # ── Main draw call ─────────────────────────────────────────────────────
     def draw(self, game: GameController) -> None:
-        """
-        Draws a complete frame based on the current game state.
-        Call once per game loop cycle before window.flip().
-        """
         screen = self._window.screen
         screen.fill(settings.COLOR_BACKGROUND)
 

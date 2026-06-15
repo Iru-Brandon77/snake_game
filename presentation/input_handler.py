@@ -1,6 +1,5 @@
 import pygame
 
-
 # Maps pygame key constants to abstract action strings
 _KEY_MAP: dict[int, str] = {
     pygame.K_UP:     "UP",
@@ -18,19 +17,6 @@ _KEY_MAP: dict[int, str] = {
 
 
 class InputHandler:
-    """
-    Listens to pygame events and translates them to abstract actions.
-
-    Knows:
-      - Which keys map to which actions.
-      - How to detect a quit event (window close button).
-
-    Does NOT know:
-      - What the game does with those actions.
-      - Any game state or entity.
-      - How to draw anything.
-    """
-
     def __init__(self) -> None:
         self._quit_requested: bool = False
 
@@ -41,11 +27,6 @@ class InputHandler:
 
     # ── Commands ───────────────────────────────────────────────────────────
     def collect(self) -> list[str]:
-        """
-        Processes all pending pygame events and returns a list of
-        abstract action strings detected this frame.
-        Returns an empty list if no relevant keys were pressed.
-        """
         actions: list[str] = []
 
         for event in pygame.event.get():
