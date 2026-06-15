@@ -1,0 +1,128 @@
+from enum import Enum, auto
+
+from domain.game_rules import GameRules
+from domain.snake import Snake
+from domain.food import Food
+from domain.obstacle import Obstacle
+from application.snake_controller import SnakeController
+from application.food_controller import FoodController
+from persistence.high_score_repository import HighScoreRepository
+
+
+class GameState(Enum):
+    RUNNING  = auto()
+    PAUSED   = auto()
+    GAME_OVER = auto()
+
+
+class GameController:
+    """
+    Orchestrates one game session.
+
+    Knows:
+      - The current game state (running, paused, game over).
+      - When to delegate to SnakeController, FoodController, and GameRules.
+      - When to persist the high score.
+
+    Does NOT know:
+      - How to draw anything.
+      - How keyboard events are captured.
+      - Internal logic of snake movement or food relocation.
+    """
+
+    BOARD_WIDTH  = 20
+    BOARD_HEIGHT = 20
+
+    def __init__(self, high_score_repo: HighScoreRepository) -> None:
+        self._repo       = high_score_repo
+        self._high_score = high_score_repo.load()
+        self._state      = GameState.RUNNING
+        self._obstacle   = Obstacle.from_level(1)
+
+        self._snake_ctrl, self._food_ctrl = self._build_controllers()
+
+    # ── Queries ────────────────────────────────────────────────────────────
+    @property
+    def state(self) -> GameState:
+        return self._state
+
+    @property
+    def score(self) -> int:
+        return self._food_ctrl.score
+
+    @property
+    def high_score(self) -> int:
+        return self._high_score
+
+    @property
+    def snake(self) -> Snake:
+        return self._snake_ctrl.snake
+
+    @property
+    def food(self) -> Food:
+        return self._food_ctrl.food
+
+    @property
+    def obstacle(self) -> Obstacle:
+        return self._obstacle
+
+    # ── Commands ───────────────────────────────────────────────────────────
+    def handle_input(self, action: str) -> None:
+        """
+        Receives abstract input commands from the presentation layer.
+        Valid actions: "UP", "DOWN", "LEFT", "RIGHT", "PAUSE", "RESTART"
+        """
+        if action == "PAUSE" and self._state == GameState.RUNNING:
+            self._state = GameState.PAUSED
+            return
+
+        if action == "PAUSE" and self._state == GameState.PAUSED:
+            self._state = GameState.RUNNING
+            return
+
+        if action == "RESTART" and self._state == GameState.GAME_OVER:
+            self._restart()
+            return
+
+        if self._state == GameState.RUNNING:
+            self._snake_ctrl.handle_input(action)
+
+    def tick(self) -> None:
+        """
+        Advances the game one step. Called once per game loop cycle.
+        Does nothing if the game is not in RUNNING state.
+        """
+        if self._state != GameState.RUNNING:
+            return
+
+        self._snake_ctrl.tick()
+
+        if GameRules.is_dead(self.snake, self._obstacle, self.BOARD_WIDTH, self.BOARD_HEIGHT):
+            self._on_game_over()
+            return
+
+        if GameRules.ate_food(self.snake.head, self.food.position):
+            self.snake.schedule_growth()
+            self._food_ctrl.on_food_eaten(self.snake, self._obstacle)
+
+    # ── Private ────────────────────────────────────────────────────────────
+    def _on_game_over(self) -> None:
+        self._state = GameState.GAME_OVER
+        self._repo.save(self.score)
+        self._high_score = self._repo.load()
+
+    def _restart(self) -> None:
+        self._state    = GameState.RUNNING
+        self._obstacle = Obstacle.from_level(1)
+        self._snake_ctrl, self._food_ctrl = self._build_controllers()
+
+    def _build_controllers(self) -> tuple[SnakeController, FoodController]:
+        snake = Snake.spawn(head=(self.BOARD_WIDTH // 2, self.BOARD_HEIGHT // 2))
+        food  = Food.spawn(
+            self.BOARD_WIDTH,
+            self.BOARD_HEIGHT,
+            occupied=set(snake.body) | self._obstacle.cells,
+        )
+        snake_ctrl = SnakeController(snake)
+        food_ctrl  = FoodController(food, self.BOARD_WIDTH, self.BOARD_HEIGHT)
+        return snake_ctrl, food_ctrl
