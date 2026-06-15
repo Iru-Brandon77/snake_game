@@ -28,6 +28,9 @@ class Renderer:
         self._draw_snake(screen, game)
         self._draw_hud(screen, game)
 
+        if game.state == GameState.WAITING:
+            self._draw_welcome(screen)
+
         if game.state == GameState.PAUSED:
             self._draw_overlay(screen, "PAUSED", "Press P to continue")
 
@@ -67,6 +70,9 @@ class Renderer:
         best_text  = self._font_small.render(f"BEST   {game.high_score}", True, settings.COLOR_TEXT_DIM)
         screen.blit(score_text, (8, 8))
         screen.blit(best_text,  (8, 28))
+
+    def _draw_welcome(self, screen: pygame.Surface) -> None:
+        self._draw_overlay(screen, "SNAKE GAME", "Press ANY KEY to start")
 
     def _draw_overlay(
         self,

@@ -1,3 +1,4 @@
+import random
 from dataclasses import dataclass, field
 
 @dataclass
@@ -27,6 +28,31 @@ class Obstacle:
 
         cells = layouts.get(level, [])
         return cls(cells=set(cells))
+
+    @classmethod
+    def random(cls, board_width: int, board_height: int, count: int = 12) -> "Obstacle":
+        cells = set()
+        center_x = board_width // 2
+        center_y = board_height // 2
+
+        safe_zone = {
+            (center_x, center_y),
+            (center_x - 1, center_y),
+            (center_x - 2, center_y),
+            (center_x - 3, center_y),
+            (center_x + 1, center_y)
+        }
+
+        attempts = 0
+        while len(cells) < count and attempts < 100:
+            attempts += 1
+            x = random.randint(0, board_width - 1)
+            y = random.randint(0, board_height - 1)
+
+            if (x, y) not in safe_zone:
+                cells.add((x, y))
+
+        return cls(cells=cells)
 
     # ── Queries ────────────────────────────────────────────────────────────
     def is_blocked(self, position: tuple[int, int]) -> bool:

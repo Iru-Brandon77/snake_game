@@ -11,17 +11,18 @@ from presentation.music_player import MusicPlayer
 
 def main() -> None:
     # ── Wire services ──────────────────────────────────────────────────────
-    repo     = HighScoreRepository(Path("highscore.json"))
-    game     = GameController(repo)
-    window   = Window(board_width=settings.BOARD_WIDTH, board_height=settings.BOARD_HEIGHT, title=settings.WINDOW_TITLE)
+    repo = HighScoreRepository(Path("highscore.json"))
+    game = GameController(repo)
+    window = Window(board_width=settings.BOARD_WIDTH, board_height=settings.BOARD_HEIGHT, title=settings.WINDOW_TITLE)
     renderer = Renderer(window)
-    handler  = InputHandler()
-    music    = MusicPlayer()
+    handler = InputHandler()
+    music = MusicPlayer()
 
     # ── Startup ────────────────────────────────────────────────────────────
     window.setup()
     renderer.setup()
     music.setup()
+    music.pause()
 
     previous_state = game.state
 
@@ -43,6 +44,9 @@ def main() -> None:
                 music.resume()
             elif current_state == GameState.GAME_OVER:
                 music.play_death()
+            elif current_state == GameState.WAITING:
+                music.pause()
+
         previous_state = current_state
 
         renderer.draw(game)

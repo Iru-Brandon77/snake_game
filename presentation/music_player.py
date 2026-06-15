@@ -110,10 +110,6 @@ class MusicPlayer:
         return np.concatenate(chunks).astype(np.int16)
 
     def _make_tone(self, freq: float, duration: float) -> np.ndarray:
-        """
-        Generates a square-wave tone for the given frequency and duration.
-        Returns silence for freq=0 (REST).
-        """
         n  = int(_SAMPLE_RATE * duration)
         t  = np.linspace(0, duration, n, endpoint=False)
 
