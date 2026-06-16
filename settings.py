@@ -1,14 +1,14 @@
 # ── Board ──────────────────────────────────────────────────────────────────
-BOARD_WIDTH:  int = 20   # columns
-BOARD_HEIGHT: int = 20   # rows
+BOARD_WIDTH:  int = 20
+BOARD_HEIGHT: int = 20
 
 # ── Window ─────────────────────────────────────────────────────────────────
-CELL_SIZE: int = 30      # pixels per grid cell
-FPS:       int = 10      # game speed
-# (ticks per second)
+CELL_SIZE: int = 30
+FPS:       int = 10
+
 WINDOW_TITLE: str = "Snake Game"
 
-# ── Colors (R, G, B) ───────────────────────────────────────────────────────
+# ── Colors ─────────────────────────────────────────────────────────────────
 COLOR_BACKGROUND:   tuple[int, int, int]         = (15,  15,  15)
 COLOR_GRID:         tuple[int, int, int]         = (30,  30,  30)
 COLOR_SNAKE_HEAD:   tuple[int, int, int]         = (80,  220, 100)
