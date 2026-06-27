@@ -29,6 +29,7 @@ class GameController:
         self._obstacle_ctrl = ObstacleController(self.BOARD_WIDTH, self.BOARD_HEIGHT)
         self._obstacle_ctrl.generate_random_map(count=12)
         self._snake_ctrl, self._food_ctrl = self._build_controllers()
+        self._last_food_event: tuple[tuple[int, int], int] | None = None
 
     # ── Queries ────────────────────────────────────────────────────────────
     @property
@@ -55,6 +56,14 @@ class GameController:
     def obstacle(self) -> Obstacle:
         return self._obstacle_ctrl.obstacle
 
+    @property
+    def foods(self) -> list[Food]:
+        return self._food_ctrl.foods
+
+    @property
+    def last_food_event(self) -> tuple[tuple[int, int], int] | None:
+        return self._last_food_event
+
     # ── Commands ───────────────────────────────────────────────────────────
     def handle_input(self, action: str) -> None:
         if self._state == GameState.WAITING:
@@ -80,6 +89,8 @@ class GameController:
         self._state = GameState.WAITING
 
     def tick(self) -> None:
+        self._last_food_event = None
+
         if self._state != GameState.RUNNING:
             return
 
@@ -89,9 +100,14 @@ class GameController:
             self._on_game_over()
             return
 
-        if GameRules.ate_food(self.snake.head, self.food.position):
-            self.snake.schedule_growth()
-            self._food_ctrl.on_food_eaten(self.snake, self.obstacle)
+        self._food_ctrl.tick(self.snake, self.obstacle)
+
+        eaten_food = GameRules.find_eaten_food(self.snake.head, self._food_ctrl.foods)
+        if eaten_food is not None:
+            points = settings.FOOD_TYPES[eaten_food.food_type]["points"]
+            self._last_food_event = (eaten_food.position, points)
+            self.snake.schedule_growth() if False else None
+            self._food_ctrl.on_food_eaten(eaten_food, self.snake, self.obstacle)
 
     # ── Private ────────────────────────────────────────────────────────────
     def _on_game_over(self) -> None:
@@ -113,5 +129,5 @@ class GameController:
             occupied=set(snake.body) | self.obstacle.cells,
         )
         snake_ctrl = SnakeController(snake)
-        food_ctrl = FoodController(food, self.BOARD_WIDTH, self.BOARD_HEIGHT, settings.POINTS_PER_FOOD)
+        food_ctrl = FoodController(food, self.BOARD_WIDTH, self.BOARD_HEIGHT)
         return snake_ctrl, food_ctrl

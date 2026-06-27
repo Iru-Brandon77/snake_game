@@ -1,5 +1,6 @@
 from domain.snake import Snake
 from domain.obstacle import Obstacle
+from domain.food import Food
 
 class GameRules:
     @staticmethod
@@ -42,3 +43,10 @@ class GameRules:
             or cls.is_self_collision(snake)
             or cls.is_obstacle_collision(snake.head, obstacle)
         )
+
+    @staticmethod
+    def find_eaten_food(head: tuple[int, int], foods: list[Food]) -> Food | None:
+        for food in foods:
+            if head == food.position:
+                return food
+        return None

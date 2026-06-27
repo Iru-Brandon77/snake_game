@@ -38,28 +38,24 @@ class Window:
         return self._board_height * self.CELL_SIZE
 
     def to_pixels(self, grid_pos: tuple[int, int]) -> tuple[int, int]:
-        """Converts a grid (col, row) coordinate to pixel (x, y)."""
         col, row = grid_pos
         return col * self.CELL_SIZE, row * self.CELL_SIZE
 
     # ── Commands ───────────────────────────────────────────────────────────
     def setup(self) -> None:
-        """Initializes pygame and creates the window. Call once at startup."""
         pygame.init()
         self._screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption(self._title)
         self._clock = pygame.time.Clock()
 
-    def tick(self) -> None:
-        """Caps the frame rate to FPS. Call once per game loop cycle."""
+    def tick(self) -> float:
         if self._clock is None:
             raise RuntimeError("Window not initialized. Call setup() first.")
-        self._clock.tick(self.FPS)
+        milliseconds = self._clock.tick(self.FPS)
+        return milliseconds / 1000.0
 
     def flip(self) -> None:
-        """Pushes the drawn frame to the screen."""
         pygame.display.flip()
 
     def teardown(self) -> None:
-        """Quits pygame cleanly. Call on exit."""
         pygame.quit()

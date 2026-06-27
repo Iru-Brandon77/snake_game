@@ -5,20 +5,24 @@ from dataclasses import dataclass
 @dataclass
 class Food:
     position: tuple[int, int]
+    food_type: str = "normal"
+    ticks_left: int | None = None
 
-    # ── Factory ────────────────────────────────────────────────────────────
+    # ── Fábrica ─────────────────────────
     @classmethod
     def spawn(
         cls,
         board_width: int,
         board_height: int,
         occupied: set[tuple[int, int]] | None = None,
+        food_type: str = "normal",
+        lifetime_ticks: int | None = None,
     ) -> "Food":
-        food = cls(position=(0, 0))
+        food = cls(position=(0, 0), food_type=food_type, ticks_left=lifetime_ticks)
         food.relocate(board_width, board_height, occupied)
         return food
 
-    # ── Commands ───────────────────────────────────────────────────────────
+    # ── Acciones ───────────────────────────────────────────────
     def relocate(
         self,
         board_width: int,
@@ -38,3 +42,10 @@ class Food:
             raise RuntimeError("No free cells left to place food.")
 
         self.position = random.choice(available)
+
+    def advance_tick(self) -> None:
+        if self.ticks_left is not None:
+            self.ticks_left -= 1
+
+    # ── Preguntas sobre el estado ────────────────────────────────
+    def is_expired(self) -> bool:        return self.ticks_left is not None and self.ticks_left <= 0

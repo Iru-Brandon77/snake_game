@@ -2,6 +2,7 @@ import pygame
 import settings
 
 from application.game_controller import GameController, GameState
+from presentation.animation_manager import AnimationManager
 from presentation.window import Window
 
 
@@ -13,12 +14,11 @@ class Renderer:
 
     # ── Setup ──────────────────────────────────────────────────────────────
     def setup(self) -> None:
-        """Loads fonts. Call once after pygame.init()."""
         self._font_large = pygame.font.SysFont("monospace", 36, bold=True)
         self._font_small = pygame.font.SysFont("monospace", 18)
 
     # ── Main draw call ─────────────────────────────────────────────────────
-    def draw(self, game: GameController) -> None:
+    def draw(self, game: GameController, animations: AnimationManager) -> None:
         screen = self._window.screen
         screen.fill(settings.COLOR_BACKGROUND)
 
@@ -27,6 +27,7 @@ class Renderer:
         self._draw_food(screen, game)
         self._draw_snake(screen, game)
         self._draw_hud(screen, game)
+        animations.draw(screen)
 
         if game.state == GameState.WAITING:
             self._draw_welcome(screen)
@@ -54,10 +55,12 @@ class Renderer:
 
     def _draw_food(self, screen: pygame.Surface, game: GameController) -> None:
         cell = self._window.cell_size
-        x, y = self._window.to_pixels(game.food.position)
-        cx = x + cell // 2
-        cy = y + cell // 2
-        pygame.draw.circle(screen, settings.COLOR_FOOD, (cx, cy), cell // 2 - 3)
+        for food in game.foods:
+            color = settings.FOOD_TYPES[food.food_type]["color"]
+            x, y = self._window.to_pixels(food.position)
+            cx = x + cell // 2
+            cy = y + cell // 2
+            pygame.draw.circle(screen, color, (cx, cy), cell // 2 - 3)
 
     def _draw_obstacles(self, screen: pygame.Surface, game: GameController) -> None:
         cell = self._window.cell_size

@@ -3,6 +3,7 @@ from pathlib import Path
 import settings
 from persistence.high_score_repository import HighScoreRepository
 from application.game_controller import GameController, GameState
+from presentation.animation_manager import AnimationManager
 from presentation.window import Window
 from presentation.renderer import Renderer
 from presentation.input_handler import InputHandler
@@ -10,7 +11,6 @@ from presentation.music_player import MusicPlayer
 
 
 def main() -> None:
-    # ── Wire services ──────────────────────────────────────────────────────
     repo = HighScoreRepository(Path("highscore.json"))
     game = GameController(repo)
     window = Window(board_width=settings.BOARD_WIDTH, board_height=settings.BOARD_HEIGHT, title=settings.WINDOW_TITLE)
@@ -23,6 +23,8 @@ def main() -> None:
     renderer.setup()
     music.setup()
     music.pause()
+    animations = AnimationManager()
+    animations.setup()
 
     previous_state = game.state
 
@@ -32,7 +34,7 @@ def main() -> None:
             if action == "QUIT":
                 break
             game.handle_input(action)
-
+        dt = window.tick()
         game.tick()
 
         # Sync music with game state transitions
@@ -49,9 +51,15 @@ def main() -> None:
 
         previous_state = current_state
 
-        renderer.draw(game)
+        if game.last_food_event is not None:
+            grid_pos, points = game.last_food_event
+            pixel_x, pixel_y = window.to_pixels(grid_pos)
+            centro = (pixel_x + window.cell_size // 2, pixel_y + window.cell_size // 2)
+            animations.spawn_score_popup(centro, points)
+
+        animations.tick(dt)
+        renderer.draw(game, animations)
         window.flip()
-        window.tick()
 
     # ── Teardown ───────────────────────────────────────────────────────────
     music.stop()
